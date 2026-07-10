@@ -101,7 +101,7 @@
   Traits for threadsafety: Send, Sync\\
   T: Send $\iff$ T can be transferred to another thread\\
   T: Sync $\iff$ T can be shared with $>1$ threads; \&T: Send\\
-  all primitve types are Send + Sync\\
+  all primitive types are Send + Sync\\
   
   auto traits:
   \begin{itemize}
@@ -115,7 +115,7 @@
   Cell<T>: Send + !Sync where T: Send
   * const T / * mut T: !Send + !Sync
   Rc<T>: !Send + !Sync
-  std::marker::PhantomdData<T> where T: !Send / !Sync
+  std::marker::PhantomData<T> where T: !Send / !Sync
   \end{verbatim}
   
   force opt-in for un-implemented type:
@@ -166,11 +166,11 @@ if let ... = ... {
   requires T: Send + Sync:\\
   T: Send + Sync $\implies$ \verb%RwLock<T>: Send + Sync%
 
-  logical staes: unlcoked, locked by 1 exclusive accessor, locked by any number of shared readers
+  logical states: unlocked, locked by 1 exclusive accessor, locked by any number of shared readers
 
   differentiating lock guards:\\
-  read() $\implies$ ReLockReadGuard: Deref\\
-  write() $\implies$ ReLockWriteGuard: DerefMut
+  read() $\implies$ RwLockReadGuard: Deref\\
+  write() $\implies$ RwLockWriteGuard: DerefMut
 
   writer starvation issue to consider for fairness of access
 
@@ -307,7 +307,7 @@ if let ... = ... {
   
   \subsection{Lazy Initialization}
   \begin{itemize}
-  \item execute once by 1 thread, sharable afterwards
+  \item execute once by 1 thread, shareable afterwards
   \item race possible from threads, but this is different from data race which causes undefined behaviour (UB)
   \item can use \verb%CondVar% / thread parking / \verb%std::sync::Once% / \verb%std::sync::OnceLock% to avoid wasted compute from multiple threads
   \end{itemize}
@@ -336,7 +336,7 @@ if let ... = ... {
     use of scope and variable shadowing to reuse identifiers when cloning:
     \begin{itemize}
     \item shadowing: original name is not obtainable anymore in current scope
-    \item original name still obtainable in an outerscope, can clone it in another inner scope
+    \item original name still obtainable in an outer scope, can clone it in another inner scope
     \end{itemize}
     
     reference counted pointers(\verb%Rc% and \verb%Arc%) have same restrictions as immutable reference (\verb%&T%)
@@ -355,7 +355,7 @@ if let ... = ... {
 
     \subsection{Interior Mutability}
 
-    shared reference \verb%& T%: copied and sharable (not mutable)\\
+    shared reference \verb%& T%: copied and shareable (not mutable)\\
     exclusive reference \verb%& mut T%: exclusive borrow of T
 
     interior mutability provides more flexibility for shared data that needs mutation
@@ -445,7 +445,7 @@ if let ... = ... {
     \hline
     release store & fence with release ordering \newline ... \newline atomic store (any memory ordering) \\
     \hline
-    acquire lead & atomic load (any memory ordering) \newline ... \newline fence with acquire ordering \\
+    acquire load & atomic load (any memory ordering) \newline ... \newline fence with acquire ordering \\
     \hline
     \end{tabular}
 
@@ -543,7 +543,7 @@ if p == ... {
 
     LL: returns current value of a memory address, processor remembers the address internally
     
-    SC: conditionally store new value to that memory address after previous LL if no updates occured since the LL
+    SC: conditionally store new value to that memory address after previous LL if no updates occurred since the LL
 
     \subsubsection{ARM64 LL/SC Pair}
     \begin{itemize}
@@ -557,7 +557,7 @@ if p == ... {
     for efficient implementation:
     \begin{itemize}
       \item false negative can happen during store-conditional (eg: \verb%stxr%): a chunk of memory tracked usually 64 bytes / 1 kB
-      \item 1 memory address pre core can be tracked at a time
+      \item 1 memory address per core can be tracked at a time
     \end{itemize}
 
     \subsubsection{ARMv8.1 Atomic Instructions}
@@ -573,7 +573,7 @@ if p == ... {
 
     use \verb%std::hint::black_box(..)% to disable compiler optimization when doing performance measurement
 
-    measurable difference when writes to cache require exclusive access at the same time when other cores are tring to load on the same cache lines
+    measurable difference when writes to cache require exclusive access at the same time when other cores are trying to load on the same cache lines
 
     add padding to separate variables in cache lines (to reduce false sharing)\\
     eg: \verb%#[repr(align(64))]% for 64 byte alignment (note: must be power of 2, cannot be mixed with packed repr)
@@ -595,7 +595,7 @@ if p == ... {
     $\implies$ write op visible to any core $\implies$ visible to all cores at same time\\
     $\implies$ memory ordering is same as instruction reordering
 
-    x864-64 has fairly strong ordering restructions:
+    x86-64 has fairly strong ordering restrictions:
     \begin{itemize}
     \item release and acquire semantics have same cost as relaxed memory ordering
     \item store doesn't get reordered earlier than a preceding memory operation
@@ -642,7 +642,7 @@ if p == ... {
       \item both an release and an acquire fence
     \end{itemize}  
 
-    on X64-64:
+    on x86-64:
     \begin{itemize}
     \item Acquire and Release are same as relaxed memory ordering (acquire/release fences are elided)
     \item SeqCst: issue of mfence instruction
@@ -722,7 +722,7 @@ if p == ... {
 
     originally added to Linux systems: \verb%SYS_futex% syscall: use of 32 bit atomic variable address to notify threads when to wake up
 
-    solution for missing wakeup signal: atomic op for wait $\implies$ a wake, between check of expect value provided to wait and the moment it goes to sleep, is not missed
+    solution for missing wakeup signal: atomic op for wait $\implies$ a wake, between check of expected value provided to wait and the moment it goes to sleep, is not missed
 
     manage state in userspace if possible, only rely on slower code path (via syscall) when absolutely necessary (need for a block)
 
@@ -755,9 +755,9 @@ if p == ... {
 
     \subsection{Spin Lock}
 
-    release store (unlock) and acquire load (lock) pair for preventation of data race (UB)
+    release store (unlock) and acquire load (lock) pair for prevention of data race (UB)
     
-    \verb%std::hint::spin_leep()%: possible optimization of processor
+    \verb%std::hint::spin_loop()%: possible optimization of processor
 
     possible implementation:
     \begin{itemize}
@@ -781,7 +781,7 @@ if p == ... {
       \item \verb%T: Send%
       \item use of \verb%unsafe%:
         \begin{itemize}
-        \item may be unitialized
+        \item may be uninitialized
         \item non-copy data must not be duplicated
         \item manual content drop may be necessary: leaking/forgetting is safe but sometimes undesirable
         \item eg: \verb%std::mem::MaybeUninit<T>% (unsafe version of \verb%Option<T>%) for efficiency where user tracks its initialized status
@@ -795,7 +795,7 @@ if p == ... {
 
         use of non-Copy type and pass by value / consume by called function $\implies$ prevent caller from using that object again at compile time (also elides some runtime checks)
         \begin{itemize}
-          \item \verb%TX-RX% pair for message passing, \verb%Channel% shared inside their private implmentations
+          \item \verb%TX-RX% pair for message passing, \verb%Channel% shared inside their private implementations
           \item use of \verb%Arc<T>% for sharing of allocation and resource dropping: \verb%RX% drop and \verb%TX% drop $\implies$ \verb%Arc<T>% drop $\implies$ \verb%T% drop
           \item \verb%Arc<T>% incurs extra runtime overhead for allocation
           \end{itemize}
@@ -819,8 +819,8 @@ if p == ... {
           wrapping struct is \verb%!Send%
           \item \verb%RX% stays on the same thread, \verb%TX% allows to cross thread boundaries
           \item use receiving thread's handle to invoke waking up a blocked thread (place this inside the sender struct)
-          \item call unpark on receiving thread's handle after release store optation is performed by the sender
-          \item recever checks \verb%Channel%'s variable to avoid spurious wakeup
+          \item call unpark on receiving thread's handle after release store operation is performed by the sender
+          \item receiver checks \verb%Channel%'s variable to avoid spurious wakeup
         \end{itemize}
       \end{itemize}
 
@@ -855,7 +855,7 @@ if p == ... {
 \begin{verbatim}
   impl<T> Drop for Arc<T> {
     fn drop(&mut self) {
-    if var.fetchsub(1, release) == 1 {
+    if var.fetch_sub(1, release) == 1 {
       fence(acquire); //conditional acquire
       //drop logic
       unsafe {
@@ -870,7 +870,7 @@ if p == ... {
    pub fn get_mut(arc: &mut Self) ->
     Option<&mut T> {
     if arc.data().ref_count.load(Relaxed) == 1 {
-        fence(Acquire); //contional acquire
+        fence(Acquire); //conditional acquire
         //gained exclusive access now
         unsafe { Some(&mut arc.ptr.as_mut().data) }
     } else {
@@ -904,7 +904,7 @@ if p == ... {
     drop implementation of weak pointer and strong pointer:
     \begin{itemize}
     \item strong pointer count is 0 $\implies$ drop \verb%T%
-    \item weak pointer + strong pointer count dropping to 0 $\implies$ droppping \verb%ArcData<T>%
+    \item weak pointer + strong pointer count dropping to 0 $\implies$ dropping \verb%ArcData<T>%
     \end{itemize}
 
     Rust drop order:
@@ -933,7 +933,7 @@ if p == ... {
     strong pointer access to mutate data: runtime conditional check to allow exclusive access to \verb%T%
     \begin{itemize}
     \item check weak pointer counter is 0, strong pointer count is 1
-    \item cast underlyding data and return \verb%& mut T%; safe since \verb%Arc% exists
+    \item cast underlying data and return \verb%& mut T%; safe since \verb%Arc% exists
     \end{itemize}
 
     convert from strong pointer to weak pointer (downgrade): call clone on weak pointer and return the weak pointer
@@ -942,7 +942,7 @@ if p == ... {
     \begin{itemize}
       \item if user is not using weak pointers then they don't have to pay the cost when cloning /dropping
       \item use \verb%ManuallyDrop<T>% instead of \verb%Option<T>% to save an extra state and use existence of \verb%Arc<T>% to know if data is gone or not
-      \item let 1 weak count represets all existing \verb%Arc<T>%s $\iff$ 1 \verb%Arc<T>% left, decrement 1 weak count associated with all of them
+      \item let 1 weak count represents all existing \verb%Arc<T>%s $\iff$ 1 \verb%Arc<T>% left, decrement 1 weak count associated with all of them
       \item downgrade and \verb%get_mut% requires more change:
       \item \verb%get_mut%
         \begin{itemize}
@@ -953,7 +953,7 @@ if p == ... {
       \item downgrade
         \begin{itemize}
         \item check that special value for \verb%alloc_ref_count% (weak pointer + strong point counter) is not present, otherwise loop
-        \item compare-exchange acquire with \verb%get_mut% method on \verb%alloc_ref_count% atomic variable: increment if success and this will make future \verb%get_mut% fail until \verb%Weak::drop% makes this \verb%alloc_ref_count% go back to 1 via release memmory ordering
+        \item compare-exchange acquire with \verb%get_mut% method on \verb%alloc_ref_count% atomic variable: increment if success and this will make future \verb%get_mut% fail until \verb%Weak::drop% makes this \verb%alloc_ref_count% go back to 1 via release memory ordering
         \end{itemize}
       \end{itemize}
     
@@ -974,7 +974,7 @@ if p == ... {
     \end{itemize}
 
     \subsubsection{Constructing Mutex}
-    use atomic variable for tutex-like syscall (invoke wait for locking):
+    use atomic variable for futex-like syscall (invoke wait for locking):
 \begin{verbatim}
     struct Mutex<T> {
       state:: AtomicU32,
@@ -999,7 +999,7 @@ if p == ... {
 
     use drop of guard to unlock mutex by invoking wake after setting state to unlocked value:
 \begin{verbatim}
-    imnpl<T> Drop for MutexGuard<'_, T> {
+    impl<T> Drop for MutexGuard<'_, T> {
       fn drop(& mut self){
         self.mutex.state.store(0, Release);
         // sufficient for 1 thread to claim lock
@@ -1021,7 +1021,7 @@ if p == ... {
     \item unlock and lock functions in \verb%lock_api::RawMutex% trait
     \end{itemize}
 
-    futher optimizations to avoid syscall:
+    further optimizations to avoid syscall:
     \begin{itemize}
     \item avoid unconditional awake when dropping MutexGuard: use extra info to track if there are no other threads waiting:
       \begin{itemize}
@@ -1048,7 +1048,7 @@ if p == ... {
 
     locks on a notify signal from another thread
 
-    checks on some supplied condition to enable further access to critital section for associated thread
+    checks on some supplied condition to enable further access to critical section for associated thread
 
     thread may be spuriously woken up which is kept in check by the supplied condition, however this locks and unlocks mutex so it takes up compute cycles
 
