@@ -755,8 +755,8 @@ if p == ... {
 
     \subsection{Spin Lock}
 
-    release store (unlock) and acquire load (lock) pair for prevention of data race (UB)
-    
+    release store (unlock) and atomic read-modify-write with acquire semantics (lock, eg: \verb%swap(true, Acquire)% or \verb%compare_exchange%) pair for mutual exclusion and prevention of data race (UB)
+
     \verb%std::hint::spin_loop()%: possible optimization of processor
 
     possible implementation:
