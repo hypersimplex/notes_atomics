@@ -289,7 +289,7 @@ if let ... = ... {
     \item \verb%compare_exchange%:
       \begin{itemize}
       \item ABA problem for pointer algorithms
-      \item weak version exists for more efficient impl. on some hardware at expense of spurious wakeup
+      \item weak version exists for more efficient impl. on some hardware at expense of spurious failure (due to hardware contention, cache invalidation, context switches, etc.)
       \end{itemize}
     \item \verb%fetch_update% $\iff$ load followed by loop with \verb%compare_exchange_weak% and user provided computation
   \end{itemize}
