@@ -163,8 +163,9 @@ if let ... = ... {
   
   \subsection{ReaderWriterLock}
 
-  requires T: Send + Sync:\\
-  T: Send + Sync $\implies$ \verb%RwLock<T>: Send + Sync%
+  thread safety (transferring requires \verb%T: Send%, sharing requires \verb%T: Send + Sync%):\\
+  T: Send $\implies$ \verb%RwLock<T>: Send%\\
+  T: Send + Sync $\implies$ \verb%RwLock<T>: Sync%
 
   logical states: unlocked, locked by 1 exclusive accessor, locked by any number of shared readers
 
@@ -246,8 +247,10 @@ if let ... = ... {
   \verb%T: !Send% $\implies$ \verb%RefCell<T>: !Send + !Sync%\\
   \verb%T: Send% $\implies$ \verb%Mutex<T>: Send + Sync% (usual)\\
   \verb%T: !Send% $\implies$ \verb%Mutex<T>: !Send + !Sync%\\
-  \verb%T: Send + Sync% $\implies$ \verb%RwLock<T>: Send + Sync% (usual)\\
-  \verb%T: !Send / !Sync% $\implies$ \verb%RwLock<T>: !Send + !Sync%\\
+  \verb%T: Send% $\implies$ \verb%RwLock<T>: Send%\\
+  \verb%T: Send + Sync% $\implies$ \verb%RwLock<T>: Sync%\\
+  \verb%T: !Send% $\implies$ \verb%RwLock<T>: !Send + !Sync%\\
+  \verb%T: !Sync% $\implies$ \verb%RwLock<T>: !Sync% (remains Send if T: Send)\\
 
   \subsection{Traits for Shared Ownership Primitives}
   \verb%Rc<T>: !Send + !Sync%\\
