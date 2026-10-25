@@ -328,7 +328,7 @@ if let ... = ... {
   \subsection{Data Sharing Between Threads in General}
   data shared need to outlive all involved threads:
   \begin{itemize}
-    \item make data owned by entire program via static lifetime (static item exists even before start of the main program
+    \item make data owned by entire program via static lifetime (static item exists even before start of the main program)
     \item leak an allocation and promise never to drop it from that point onward in the duration of the entire program:
       eg: \verb%Box::leak(Box::new(..))%\\
       note: \verb%'static% means the object will exist until the end of the program but may not exist at the start of the program\\
@@ -860,11 +860,12 @@ if p == ... {
 \begin{verbatim}
   impl<T> Drop for Arc<T> {
     fn drop(&mut self) {
-    if var.fetch_sub(1, release) == 1 {
-      fence(acquire); //conditional acquire
-      //drop logic
-      unsafe {
-        drop(Box::from_raw(self.ptr.as_ptr()));
+      if var.fetch_sub(1, release) == 1 {
+        fence(acquire); //conditional acquire
+        //drop logic
+        unsafe {
+          drop(Box::from_raw(self.ptr.as_ptr()));
+        }
       }
     }
   }
@@ -957,7 +958,7 @@ if p == ... {
           \end{itemize}
       \item downgrade
         \begin{itemize}
-        \item check that special value for \verb%alloc_ref_count% (weak pointer + strong point counter) is not present, otherwise loop
+        \item check that special value for \verb%alloc_ref_count% (weak pointer + strong pointer counter) is not present, otherwise loop
         \item compare-exchange acquire with \verb%get_mut% method on \verb%alloc_ref_count% atomic variable: increment if success and this will make future \verb%get_mut% fail until \verb%Weak::drop% makes this \verb%alloc_ref_count% go back to 1 via release memory ordering
         \end{itemize}
       \end{itemize}
@@ -1075,7 +1076,7 @@ if p == ... {
 
     \begin{verbatim}
     fn wake(){
-      atomic_var++;
+      atomic_var.fetch_add(1, Relaxed);
       futex::wake(atomic_var);
     }
 
@@ -1092,7 +1093,7 @@ if p == ... {
       //associated with the mutex) and signaling,
       //therefore relaxed load of atomic variable
       //by wait() is enough
-      guard.drop();
+      drop(guard);
 
       //unlocked now
 
@@ -1126,7 +1127,7 @@ if p == ... {
     2 lock types to access data:
     \begin{itemize}
     \item \verb%ReadGuard%: allows $\geq1$ readers at the same time
-    \item \verb%WriteGuard%: behaves similar to \verb%Mutex% (exclusive access from 1 thread at a time
+    \item \verb%WriteGuard%: behaves similar to \verb%Mutex% (exclusive access from 1 thread at a time)
     \end{itemize}
 
     optimizations:
