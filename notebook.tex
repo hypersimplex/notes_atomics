@@ -974,22 +974,24 @@ if p == ... {
     \end{itemize}
 
     \subsubsection{Constructing Mutex}
-    use atomic variable for futex-like syscall (invoke wait for locking):
+    use atomic variable for futex-like syscall (invoke wait for locking); note: \verb%UnsafeCell<T>% is \verb%!Sync%, so \verb%Mutex<T>% is \verb%!Sync% by default, requiring explicit \verb%unsafe impl<T: Send> Sync% to allow thread-safe sharing:
 \begin{verbatim}
     struct Mutex<T> {
-      state:: AtomicU32,
+      state: AtomicU32,
       value: UnsafeCell<T>,
     }
 
+    unsafe impl<T: Send> Sync for Mutex<T> {}
+
     struct MutexGuard<'a, T> {
-      mutex: & 'a Mutex<T>,
+      mutex: &'a Mutex<T>,
     }
 
     //Produce a guard as proof of exclusive access.
     //
     //add Deref and DerefMut traits for data access
     //like & T, & mut T
-    fn lock(& self) -> MutexGuard<T> {
+    fn lock(&self) -> MutexGuard<'_, T> {
       while self.state.swap(1, Acquire) == 1 {
         wait(&self.state, 1); //wait until state != 1
       }
