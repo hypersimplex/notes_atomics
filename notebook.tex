@@ -449,7 +449,7 @@ if let ... = ... {
     \hline
     \end{tabular}
 
-    any atomic store following release fence is observable by any atomic load before acquire fence $\implies$ happens-before relation is established between the release-acquire fences pairing
+    a happens-before relation is established between a release fence and an acquire fence if an atomic store following the release fence is observed (read) by an atomic load preceding the acquire fence; note: fences do not synchronize unconditionally without an atomic load actually reading the value written by the store
 
     \subsubsection{Practical Usages}
     \begin{itemize}
