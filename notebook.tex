@@ -594,16 +594,15 @@ if p == ... {
     \end{itemize}
 
     \subsection{Memory Ordering}
-    x86-64 and ARM64 are other-multi-copy atomic architectures\\
-    $\implies$ write op visible to any core $\implies$ visible to all cores at same time\\
-    $\implies$ memory ordering is same as instruction reordering
+    x86-64 and ARM64 are other-multi-copy atomic:\\
+    $\implies$ once a write is visible to another core, it is visible to all cores at the same time\\
+    $\implies$ memory ordering is purely about preventing reordering of operations on each core
 
-    x86-64 has fairly strong ordering restrictions:
+    x86-64 has strongly ordered memory:
     \begin{itemize}
-    \item release and acquire semantics have same cost as relaxed memory ordering
-    \item store doesn't get reordered earlier than a preceding memory operation
-    \item load doesn't get reordered later than a following memory operation
-    \item $\implies$ (acquire $\iff$ relaxed, release $\iff$ relaxed)
+    \item preserves Load $\to$ Load, Load $\to$ Store, and Store $\to$ Store order
+    \item $\implies$ regular loads provide acquire semantics, regular stores provide release semantics (same cost as relaxed)
+    \item only allowed reordering is Store $\to$ Load (write sits in store buffer while subsequent load reads from cache); prevented by \verb%SeqCst%
     \end{itemize}
     
     ARM64 has relatively weak ordering: all memory ops can be reordered
