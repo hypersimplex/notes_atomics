@@ -831,7 +831,7 @@ if p == ... {
 
     basic implementation: use a pointer type to the shared underlying data via \verb%std::ptr::NonNull%, use counter info for the shared data; use \verb%NonNull::from(Box::leak(Box::new(..)))% to get a pointer from initial allocation
 
-    implement ergonomic methods \verb%deref% and \verb%deref_mut% from traits: \verb%Deref%, \verb%DerefMut%
+    implement ergonomic method \verb%deref% from trait \verb%Deref% (note: \verb%DerefMut% is not implemented because \verb%Arc% represents shared ownership; providing \verb%&mut T% unconditionally would violate Rust's aliasing rules and cause data races; mutable access requires interior mutability or \verb%get_mut%)
 
     let \verb%cloning% change internal counter and point to the shared data
     
