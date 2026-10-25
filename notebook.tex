@@ -938,7 +938,7 @@ if p == ... {
 
     strong pointer access to mutate data: runtime conditional check to allow exclusive access to \verb%T%
     \begin{itemize}
-    \item check weak pointer counter is 0, strong pointer count is 1
+    \item check \verb%data_ref_count == 1% and \verb%alloc_ref_count == 1% ($\implies$ 0 weak pointers and 1 strong pointer)
     \item cast underlying data and return \verb%& mut T%; safe since \verb%Arc% exists
     \end{itemize}
 
