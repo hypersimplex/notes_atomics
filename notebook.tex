@@ -503,7 +503,7 @@ if p == ... {
 
     single thread: happens-before relations exist between every single operations
 
-    unlocking a mutex happens-before locking that mutex
+    unlocking a mutex happens-before locking that mutex again (an unlock release-synchronizes with a subsequent acquire-lock)
 
     SeqCst results in 1 globally consistent order of operations that participates in SeqCst, but it is usually overly constraining
 
