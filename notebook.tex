@@ -178,7 +178,7 @@ if let ... = ... {
   park: current thread put itself to sleep\\
   unpark: another thread wakes sleeping thread; needs handle of the sleep thread read from \verb%spawn()% method or \verb%thread::current()%
 
-  spurious wakeup due to false sharing, etc. $\implies$ user provide a check upon wakeup
+  spurious wakeup (due to OS signals, futex hash bucket collisions, or scheduler interruptions) $\implies$ user must provide a condition check in a loop upon wakeup
 
   request to unpark recorded if unpark happens before park in order to  avoid lost notification, but does not stack up (max of 1 unpark recorded)
 
