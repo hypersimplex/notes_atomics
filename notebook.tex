@@ -89,12 +89,12 @@
 
   \subsection{Single Thread Interior Mutability}
   RefCell: borrow at runtime\\
-  Cell: value replacement, not borrow; limited to word size
+  Cell: value replacement, not borrow; supports arbitrary size (not limited to word size)
   
   \subsection{Threadsafe Interior Mutability}
   Mutex: exclusive borrow at runtime\\
   RwLock: differentiates borrow type: exclusive vs. shared read only\\
-  Atomics: value replacement, not borrow; limited to word size\\
+  Atomics: value replacement, not borrow; limited to supported hardware word/scalar sizes\\
 
   UnsafeCell: express raw pointer to wrapped data via unsafe block; in practice wrapped by a safer interface to user\\
 
