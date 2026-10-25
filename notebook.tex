@@ -395,7 +395,8 @@ if let ... = ... {
     store operation specified with release semantics\\
     load operation specified with acquire semantics
 
-    happens-before relation formed at runtime when load succeeds: all memory operations before release store is observable by and after acquire load
+    happens-before relation formed at runtime when acquire load observes value written by release store (or its release sequence):\\
+    all memory operations before release store become visible after acquire load
 
     release store of an atomic variable may be modified by any number of fetch-modify / compare-exchange operations and still have a happens-before relation with an acquire load afterwards on the said atomic variable
 
