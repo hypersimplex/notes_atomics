@@ -101,7 +101,7 @@
   Traits for threadsafety: Send, Sync\\
   T: Send $\iff$ T can be transferred to another thread\\
   T: Sync $\iff$ T can be shared with $>1$ threads; \&T: Send\\
-  all primitive types are Send + Sync\\
+  primitive types are Send + Sync, except raw pointers (\verb%*const T%, \verb%*mut T%)\\
   
   auto traits:
   \begin{itemize}
@@ -299,13 +299,15 @@ if let ... = ... {
   
   \subsection{Scoped Thread}
 
-  regular \verb%std::thread::spawn% requires closure to be Send $\implies$ all captures of closure are required to be Send
+  regular \verb%std::thread::spawn% requires closure to be \verb%'static% + \verb%Send%:
+  \begin{itemize}
+  \item \verb%'static% bound prevents borrowing local variables (thread may outlive parent stack frame)
+  \end{itemize}
   
   \verb%std::thread::scope%:
   \begin{itemize}
-  \item borrows object of non-static lifetime that can outlive thread
-  \item mutability rules apply
-  \item threads are automatically joined at the end of the scope
+  \item guarantees all spawned threads are joined before scope exits
+  \item $\implies$ safely borrows non-\verb%'static% local variables (standard borrow rules apply)
   \end{itemize}
   
   \subsection{Lazy Initialization}
